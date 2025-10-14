@@ -1,12 +1,16 @@
 import json
 import psycopg2
 from datetime import datetime
+from dotenv import load_dotenv
+import os
+
+# load_dotenv()
 
 DB_CONFIG = {
-    "dbname": "skins",
-    "user": "postgres",
-    "password": "postgres",
-    "host": "localhost",
+    "dbname": os.getenv("POSTGRES_DB"),
+    "user": os.getenv("POSTGRES_USER"),
+    "password": os.getenv("POSTGRES_PASSWORD"),
+    "host": "db",
     "port": 5432
 }
 

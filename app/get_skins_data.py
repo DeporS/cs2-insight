@@ -8,7 +8,7 @@ import json
 
 def save_data_json():
 
-    load_dotenv()   
+    # load_dotenv()   
 
     # store API
     user_id = os.getenv("MY_USER_ID")

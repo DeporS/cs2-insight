@@ -9,5 +9,5 @@ Docker
 - docker compose up -d
 
 DB
-- psql -h localhost -U postgres -d skins
+- psql -h localhost -p 5432 -U {POSTGRES_USER} -d {POSTGRES_DB}
 

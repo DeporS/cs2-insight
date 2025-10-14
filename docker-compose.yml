@@ -5,36 +5,83 @@ services:
     container_name: postgres_skins
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: skins
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
   
-  airflow:
+  init_airflow:
     build:
       context: .
       dockerfile: Dockerfile.airflow
-    container_name: airflow_scheduler
+    container_name: airflow_init
     depends_on:
       - db
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@db:5432/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    volumes:
+      - airflow_data:/opt/airflow
+    command: >
+      bash -c "airflow db migrate && airflow users create --username ${AIRFLOW_ADMIN_USER} --password ${AIRFLOW_ADMIN_PASSWORD} --firstname Air --lastname Flow --role Admin --email ${AIRFLOW_ADMIN_EMAIL} || true"
+    restart: "no" 
+
+  webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+    container_name: airflow_webserver
+    depends_on:
+      - init_airflow 
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      PYTHONPATH: /opt/airflow/app
+      # custom env variables
+      MY_USER_ID: ${MY_USER_ID}
+      MY_SECRET_API: ${MY_SECRET_API}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - ./dags:/opt/airflow/dags
       - ./app:/opt/airflow/app
       - airflow_data:/opt/airflow
     ports:
       - "8080:8080"
-    command: >
-      bash -c "airflow db init &&
-               airflow users create --username admin --password admin --firstname Air --lastname Flow --role Admin --email admin@example.com &&
-               airflow webserver & airflow scheduler"
+    command: airflow webserver
+    restart: always
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+    container_name: airflow_scheduler
+    depends_on:
+      - init_airflow 
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      PYTHONPATH: /opt/airflow/app
+      # custom env variables
+      MY_USER_ID: ${MY_USER_ID}
+      MY_SECRET_API: ${MY_SECRET_API}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./app:/opt/airflow/app
+      - airflow_data:/opt/airflow
+    command: airflow scheduler
     restart: always
 
 volumes:
   airflow_data:
+  postgres_data:
