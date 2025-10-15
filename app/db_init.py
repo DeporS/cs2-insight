@@ -41,6 +41,15 @@ def create_tables(conn):
                 min_price NUMERIC,
                 quantity INT
             );
+                        
+            CREATE TABLE daily_avg_skin_prices (
+                skin_id INT REFERENCES skins(id),
+                avg_price NUMERIC,
+                avg_suggested NUMERIC,
+                avg_quantity NUMERIC,
+                date DATE DEFAULT CURRENT_DATE,
+                PRIMARY KEY (skin_id, date)
+            );
             """)
             conn.commit()
             print("Tables created (If not existed).")
@@ -123,6 +132,42 @@ def load_data_to_postgres():
         logging.exception(f"JSON file not found at path: {json_path}")
     except Exception as e:
         logging.exception(f"Unexpected error: {e}")
+    finally:
+        if conn:
+            try:
+                conn.close()
+                logging.info("Connection closed.")
+            except Exception as e:
+                logging.exception(f"Error closing connection: {e}")
+
+
+def calculate_daily_avg():
+    """Calculate daily average prices and save them into daily_avg_prices table."""
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO daily_avg_skin_prices (skin_id, avg_price, avg_suggested, avg_quantity, date)
+                SELECT 
+                    sp.skin_id,
+                    ROUND(AVG(min_price), 2) AS avg_price,
+                    ROUND(AVG(suggested_price), 2) AS avg_suggested,
+                    ROUND(AVG(quantity), 2) AS avg_quantity,
+                    CURRENT_DATE AS date
+                FROM skin_prices sp
+                JOIN snapshots s ON sp.snapshot_id = s.id
+                WHERE s.timestamp >= NOW() - INTERVAL '24 hours'
+                GROUP BY sp.skin_id
+                ON CONFLICT (skin_id, date) DO UPDATE 
+                SET 
+                    avg_price = EXCLUDED.avg_price,
+                    avg_suggested = EXCLUDED.avg_suggested,
+                    avg_quantity = EXCLUDED.avg_quantity;
+            """)
+            conn.commit()
+            logging.info("Daily average prices calculated and stored.")
+    except Exception as e:
+        logging.exception(f"Error calculating daily averages: {e}")
     finally:
         if conn:
             try:

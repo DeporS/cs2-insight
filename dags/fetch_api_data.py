@@ -1,8 +1,3 @@
-from airflow import DAG
-from airflow.operators.python import PythonOperator
-from datetime import datetime, timedelta
-import requests
-import json
 import logging
 
 from get_skins_data import save_data_json
