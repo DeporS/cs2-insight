@@ -1,10 +1,14 @@
 import json
 import psycopg2
 from datetime import datetime
-from dotenv import load_dotenv
 import os
+import logging
 
-# load_dotenv()
+# Setup logger
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 
 DB_CONFIG = {
     "dbname": os.getenv("POSTGRES_DB"),
@@ -82,7 +86,7 @@ def insert_data(conn, data, snapshot_id):
 
 
 
-def main():
+def load_data_to_postgres():
     # Read data from json
     with open("skins.json", "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -93,6 +97,3 @@ def main():
     insert_data(conn, data, snapshot_id)
     conn.close()
     print("Inserted data correctly.")
-
-if __name__ == "__main__":
-    main()
