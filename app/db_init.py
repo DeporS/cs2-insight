@@ -27,8 +27,6 @@ def create_tables(conn):
                 id SERIAL PRIMARY KEY,
                 market_hash_name TEXT UNIQUE
             );
-                market_hash_name TEXT UNIQUE
-            );
 
             CREATE TABLE IF NOT EXISTS snapshots (
                 id SERIAL PRIMARY KEY,
@@ -108,8 +106,9 @@ def insert_data(conn, data, snapshot_id):
 def load_data_to_postgres():
     """Main ETL entrypoint: load JSON and write to database."""
     conn = None
+    json_path = "skins.json"
     try:
-        with open("skins.json", "r", encoding="utf-8") as f:
+        with open(json_path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
         conn = psycopg2.connect(**DB_CONFIG)
@@ -122,8 +121,6 @@ def load_data_to_postgres():
         logging.info("Data successfully loaded into database.")
     except FileNotFoundError:
         logging.exception(f"JSON file not found at path: {json_path}")
-    except OperationalError as e:
-        logging.exception(f"Database connection error: {e}")
     except Exception as e:
         logging.exception(f"Unexpected error: {e}")
     finally:
