@@ -3,6 +3,7 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
 from fetch_api_data import fetch_api_data
 from load_to_postgres import load_to_postgres
+from calculate_stats import calculate_stats_task
 
 default_args = {
     "owner": "airflow",
@@ -30,4 +31,9 @@ with DAG(
         python_callable=load_to_postgres,
     )
 
-    fetch_data >> load_data
+    calculate_stats_task = PythonOperator(
+        task_id="calculate_stats_and_alerts",
+        python_callable=calculate_stats_task,
+    )
+
+    fetch_data >> load_data >> calculate_stats_task
