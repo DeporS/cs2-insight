@@ -37,7 +37,7 @@ def save_data_json():
 
         # GET
         logging.info("Fetching data from Skinport API...")
-        resp = requests.get(f"{BASE}/items", headers=headers, params=params, Timeout=15)
+        resp = requests.get(f"{BASE}/items", headers=headers, params=params, timeout=15)
 
         # check status and convert json
         if resp.status_code == 200:

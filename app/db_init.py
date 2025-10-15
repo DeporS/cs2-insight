@@ -45,7 +45,7 @@ def create_tables(conn):
             conn.commit()
             print("Tables created (If not existed).")
     except Exception as e:
-        logging.error(f"Error creating tables: {e}")
+        logging.exception(f"Error creating tables: {e}")
         conn.rollback()
         raise
 
@@ -60,7 +60,7 @@ def insert_snapshot(conn):
             logging.info(f"Inserted snapshot with ID: {snapshot_id}")
             return snapshot_id
     except Exception as e:
-        logging.error(f"Error inserting snapshot: {e}")
+        logging.exception(f"Error inserting snapshot: {e}")
         conn.rollback()
         raise
 
@@ -98,7 +98,7 @@ def insert_data(conn, data, snapshot_id):
             conn.commit()
             logging.info(f"Inserted {len(data)} records. Snapshot ID: {snapshot_id}.")
     except Exception as e:
-        logging.error(f"Error inserting data: {e}")
+        logging.exception(f"Error inserting data: {e}")
         conn.rollback()
         raise
 
@@ -129,4 +129,4 @@ def load_data_to_postgres():
                 conn.close()
                 logging.info("Connection closed.")
             except Exception as e:
-                logging.error(f"Error closing connection: {e}")
+                logging.exception(f"Error closing connection: {e}")
