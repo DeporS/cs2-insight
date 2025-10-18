@@ -1,5 +1,8 @@
 import logging
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi import Request
 import psycopg2
 import psycopg2.extras
 import os
@@ -35,6 +38,8 @@ def get_latest_prices(limit: int = 100):
     JOIN snapshots s ON sp.snapshot_id = s.id
     JOIN skins sk ON sp.skin_id = sk.id
     WHERE s.timestamp = (SELECT MAX(timestamp) FROM snapshots)
+    ORDER BY sk.market_hash_name
+    LIMIT %s
     """
 
     try:
@@ -55,3 +60,10 @@ def get_latest_prices(limit: int = 100):
             conn.close()
         except:
             pass
+
+
+templates = Jinja2Templates(directory="app/templates")
+
+@app.get("/", response_class=HTMLResponse)
+def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
