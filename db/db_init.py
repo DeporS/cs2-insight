@@ -236,12 +236,12 @@ def calculate_stats_and_alerts():
 
         # detect alerts
         def detect_alerts(row):
-            if row["delta_24h"] is None or pd.isna(row["delta_24h"]):
+            if row["delta_6h"] is None or pd.isna(row["delta_6h"]):
                 return None
-            if row["delta_24h"] > 0.2:
-                return "PRICE_SPIKE"
-            elif row["delta_24h"] < -0.2:
-                return "PRICE_DROP"
+            if row["delta_6h"] >= 0.10:
+                return "6H_PRICE_SPIKE"
+            elif row["delta_6h"] < -0.10:
+                return "6H_PRICE_DROP"
             return None
 
         df_stats["alert_type"] = df_stats.apply(detect_alerts, axis=1)
