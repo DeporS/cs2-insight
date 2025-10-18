@@ -29,7 +29,7 @@ def get_db_connection():
         raise HTTPException(status_code=500, detail="Database connection error")
     
 @app.get("/prices/")
-def get_latest_prices(limit: int = 100):
+def get_latest_prices(limit: int = -1):
     """Fetch the latest skin prices from the database."""
     
     sql = """
@@ -45,7 +45,10 @@ def get_latest_prices(limit: int = 100):
     try:
         conn = get_db_connection()
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute(sql, (limit,))
+            if limit == -1: # No limit
+                cur.execute(sql.replace("LIMIT %s", "")) 
+            else:
+                cur.execute(sql, (limit,))
             rows = cur.fetchall()
 
         for r in rows:

@@ -28,7 +28,7 @@
 
     <script>
         async function loadPrices() {
-            const response = await fetch("/prices?limit=50");
+            const response = await fetch("/prices");
             const data = await response.json();
 
             const tbody = document.querySelector("#prices tbody");
