@@ -21,7 +21,7 @@ def can_make_request():
         return True
     return False
 
-def get_all_cs2_items(base_time_sleep=2):
+def get_all_cs2_items(base_time_sleep=12):
     all_items = []
     start = 0
     count = 1
@@ -48,7 +48,7 @@ def get_all_cs2_items(base_time_sleep=2):
             continue
 
         if response.status_code == 429:
-            retry_after = int(response.headers.get("Retry-After", 300))
+            retry_after = int(response.headers.get("Retry-After", 60))
             print(f"Zbyt wiele zapytań. Czekam {retry_after} sekund...")
             # base_time_sleep += 0.1 # Incremental backoff
             # print(f"Zwiększam czas oczekiwania do {base_time_sleep} sekund między zapytaniami.")
