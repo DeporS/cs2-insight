@@ -37,7 +37,7 @@ def get_all_cases():
             print(f"Case: {case_name}, Data: {data}")
             # Process the data as needed
 
-        time.sleep(3)  # Be polite and avoid hitting rate limits
+        time.sleep(3)  # avoid hitting rate limits
 
 if __name__ == "__main__":
     get_all_cases()

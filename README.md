@@ -1,13 +1,18 @@
 # cs2-insight
-Start
-- python -m venv venv
-- venv\Scripts\Activate or source venv/bin/activate
-- pip install -r requirements.txt
-- python -m pip freeze > requirements.txt
+CS2 Insight is a data engineering project designed to automatically collect, store and present Counter-Strike 2 skin prices.
 
-Docker
-- docker compose up -d
+The system periodically fetches data from an external API, processes it using Apache Airflow, and exposes results through a FastAPI web interface.
 
-DB
-- psql -h localhost -p 5432 -U {POSTGRES_USER} -d {POSTGRES_DB}
+## Features
+- Automated data collection - Airflow fetches fresh skin prices every 30 minutes from the API.
+- Daily aggregation - Once a day, Airflow calculates the average price for each skin.
+- FastAPI dashboard - View current prices directly through a clean REST API and web interface.
+- Containerized architecture - Everything runs in Docker for simple setup and easy deployment.
+- PostgreSQL storage - All price data is stored in a PostgreSQL database for reliability and easy querying.
 
+## Tech Stack
+- Python
+- Apache Airflow
+- FastApi
+- PostgreSQL
+- Docker / Docker Compose
